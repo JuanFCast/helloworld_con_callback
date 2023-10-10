@@ -26,7 +26,10 @@ public class PrinterI implements Demo.Printer {
 		String message = parts[2];
 		StringBuilder response = new StringBuilder();
 
-		if (isPositiveInteger(message)) {
+		if (message.equals("register")) {
+			handleRegistration(clientUsername, clientHostname);
+			response.append("You've been successfully registered.");
+		} else if (isPositiveInteger(message)) {
 			handlePositiveInteger(clientUsername, clientHostname, message, response);
 		} else if (message.startsWith("listifs")) {
 			handleListInterfaces(clientUsername, clientHostname, response);
@@ -41,6 +44,11 @@ public class PrinterI implements Demo.Printer {
 		System.out.println(response.toString());
 		return response.toString();
 	}
+
+	private void handleRegistration(String clientUsername, String clientHostname) {
+		Server.registerClient(clientHostname); // Registra el hostname del cliente
+	}
+
 
 	/**
 	 * Maneja un mensaje que contiene un número entero positivo.

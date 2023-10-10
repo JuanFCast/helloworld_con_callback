@@ -46,33 +46,49 @@ public class Client {
 
         do{
             System.out.println("Select an option: \n" +
-                    "1. Send a message\n" +
-                    "2. Do throughput test\n" +
-                    "3. Do response time test\n" +
-                    "4. Do missing rate test\n" +
-                    "5. Do unprocessed rate test\n" +
-                    "6. Exit");
+                    "1. Register\n" +
+                    "2. Send a message\n" +
+                    "3. Do throughput test\n" +
+                    "4. Do response time test\n" +
+                    "5. Do missing rate test\n" +
+                    "6. Do unprocessed rate test\n" +
+                    "7. Exit");
             option = scanner.nextInt();
             scanner.nextLine();
 
             switch (option){
                 case 1:
-                    send(twoway, scanner);
+                    register(twoway);
                     break;
                 case 2:
-                    System.out.println(evaluateThroughput(twoway, scanner));
+                    send(twoway, scanner);
                     break;
                 case 3:
-                    System.out.println(evaluateResponseTime(twoway,100));
+                    System.out.println(evaluateThroughput(twoway, scanner));
                     break;
                 case 4:
-                    System.out.println(evaluateMissingRate(twoway, scanner));
+                    System.out.println(evaluateResponseTime(twoway,100));
                     break;
                 case 5:
+                    System.out.println(evaluateMissingRate(twoway, scanner));
+                    break;
+                case 6:
                     System.out.println(evaluateUnprocessedRate(twoway, scanner));
                     break;
             }
-        }while(option >= 1 && option <=5);
+        }while(option >= 1 && option <= 7);
+    }
+
+    // Función para registrar el cliente:
+    private static void register(Demo.PrinterPrx twoway) {
+        try {
+            String username = System.getProperty("user.name");
+            String hostname = getHostname();
+            String response = send(twoway, "register");
+            System.out.println("Server Response: " + response);
+        } catch (Exception e) {
+            System.out.println("Error while registering: " + e.getMessage());
+        }
     }
 
     private static void send(Demo.PrinterPrx twoway, Scanner scanner){

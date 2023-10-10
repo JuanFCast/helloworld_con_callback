@@ -1,8 +1,12 @@
 import java.io.*;
 import java.util.concurrent.*;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 public class Server {
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(10); // Crea un pool de 10 hilos
+    private static final Set<String> registeredClients = ConcurrentHashMap.newKeySet();
 
     public static void main(String[] args) {
         java.util.List<String> extraArgs = new java.util.ArrayList<String>();
@@ -24,6 +28,12 @@ public class Server {
         }
     }
 
+    public static void registerClient(String hostname) {
+        registeredClients.add(hostname);
+        System.out.println("Cliente registrado: " + hostname);
+    }
+
+
     public static String f(String m) {
         String str = null, output = "";
 
@@ -41,10 +51,5 @@ public class Server {
             return "Error: " + ex.getMessage();
         }
         return output;
-    }
-
-    // Si necesitas ejecutar una tarea pesada en el futuro, utiliza algo similar a:
-    public static void executeHeavyTask(Runnable task) {
-        threadPool.submit(task);
     }
 }
