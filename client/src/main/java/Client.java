@@ -1,10 +1,30 @@
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class Client {
+    private static final int NUMBER_OF_CLIENTS = 10;
+
     public static void main(String[] args) {
+        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CLIENTS);
+
+        for (int i = 0; i < NUMBER_OF_CLIENTS; i++) {
+            int clientId = i + 1; // Para identificar cada cliente
+
+            executorService.execute(() -> {
+                System.out.println("Starting client " + clientId);
+                simulateClient(args);
+                System.out.println("Client " + clientId + " finished.");
+            });
+        }
+
+        executorService.shutdown();
+    }
+
+    public static void simulateClient(String[] args) {
         java.util.List<String> extraArgs = new java.util.ArrayList<>();
 
         try (com.zeroc.Ice.Communicator communicator = com.zeroc.Ice.Util.initialize(args, "config.client", extraArgs)) {
