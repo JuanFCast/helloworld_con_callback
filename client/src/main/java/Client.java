@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 
 
 public class Client {
-    private static final int NUMBER_OF_CLIENTS = 10;
+    private static final int NUMBER_OF_CLIENTS = 1;
 
     public static void main(String[] args) {
         ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CLIENTS);

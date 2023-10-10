@@ -21,9 +21,22 @@ public class PrinterI implements Demo.Printer {
 	@Override
 	public String printString(String s, com.zeroc.Ice.Current current) {
 		String[] parts = s.split(":", 3);
-		String clientUsername = parts[0];
-		String clientHostname = parts[1];
-		String message = parts[2];
+		String clientUsername, clientHostname, message;
+
+		if (parts.length == 3) {
+			clientUsername = parts[0];
+			clientHostname = parts[1];
+			message = parts[2];
+		} else if (parts.length == 1) {
+			// Cuando solo envías un mensaje sin username y hostname (como "list clients")
+			clientUsername = "";
+			clientHostname = "";
+			message = parts[0];
+		} else {
+			// Maneja otros casos según sea necesario o devuelve un error
+			return "Invalid input format";
+		}
+
 		StringBuilder response = new StringBuilder();
 
 		if (message.equalsIgnoreCase("list clients")) {
