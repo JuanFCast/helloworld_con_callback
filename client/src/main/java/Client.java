@@ -107,11 +107,20 @@ public class Client {
                 break;
             }
 
-            String formattedMessage = username + ":" + hostname + ":" + message;
-            String response = twoway.printString(formattedMessage);
-            System.out.println("Server Response: " + response);
+            // Si el mensaje es "list clients", "to X:" o "BC", no se añade el username y hostname
+            // El servidor manejará estos casos específicamente
+            if (message.startsWith("list clients") || message.startsWith("to ") || message.startsWith("BC")) {
+                String response = twoway.printString(message);
+                System.out.println("Server Response: " + response);
+            } else {
+                // Para todos los demás mensajes, se añade el username y hostname
+                String formattedMessage = username + ":" + hostname + ":" + message;
+                String response = twoway.printString(formattedMessage);
+                System.out.println("Server Response: " + response);
+            }
         }
     }
+
 
     private static String send(Demo.PrinterPrx twoway, String message) throws Exception{
         if (twoway == null) {

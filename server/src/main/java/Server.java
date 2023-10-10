@@ -1,12 +1,10 @@
 import java.io.*;
 import java.util.concurrent.*;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
+import java.util.Map;
 
 public class Server {
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(10); // Crea un pool de 10 hilos
-    private static final Set<String> registeredClients = ConcurrentHashMap.newKeySet();
+    private static final ConcurrentHashMap<String, Demo.PrinterPrx> registeredClients = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
         java.util.List<String> extraArgs = new java.util.ArrayList<String>();
@@ -28,11 +26,31 @@ public class Server {
         }
     }
 
-    public static void registerClient(String hostname) {
-        registeredClients.add(hostname);
+    public static void registerClient(String hostname, Demo.PrinterPrx clientProxy) {
+        registeredClients.put(hostname, clientProxy);
         System.out.println("Cliente registrado: " + hostname);
     }
 
+
+
+    public static String listClients() {
+        return String.join(", ", registeredClients.keySet());
+    }
+
+    public static boolean sendMessageToClient(String hostname, String message) {
+        if (registeredClients.containsKey(hostname)) {
+            Demo.PrinterPrx target = registeredClients.get(hostname);
+            target.printString(message);
+            return true;
+        }
+        return false;
+    }
+
+    public static void broadcastMessage(String message) {
+        for (Demo.PrinterPrx clientProxy : registeredClients.values()) {
+            clientProxy.printString("Broadcast: " + message);
+        }
+    }
 
     public static String f(String m) {
         String str = null, output = "";

@@ -26,9 +26,12 @@ public class PrinterI implements Demo.Printer {
 		String message = parts[2];
 		StringBuilder response = new StringBuilder();
 
-		if (message.equals("register")) {
-			handleRegistration(clientUsername, clientHostname);
-			response.append("You've been successfully registered.");
+		if (message.equalsIgnoreCase("list clients")) {
+			handleListClientsRequest(response);
+		} else if (message.startsWith("to ")) {
+			handleDirectMessage(message, response);
+		} else if (message.startsWith("BC ")) {
+			handleBroadcastMessage(message);
 		} else if (isPositiveInteger(message)) {
 			handlePositiveInteger(clientUsername, clientHostname, message, response);
 		} else if (message.startsWith("listifs")) {
@@ -45,10 +48,28 @@ public class PrinterI implements Demo.Printer {
 		return response.toString();
 	}
 
-	private void handleRegistration(String clientUsername, String clientHostname) {
-		Server.registerClient(clientHostname); // Registra el hostname del cliente
+	private void handleListClientsRequest(StringBuilder response) {
+		response.append(Server.listClients());
 	}
 
+	private void handleDirectMessage(String message, StringBuilder response) {
+		String[] parts = message.split(":", 2);
+		String targetHostname = parts[0].substring(3);  // Remove "to " prefix
+		String msg = parts[1];
+
+		boolean success = Server.sendMessageToClient(targetHostname, msg);
+
+		if (success) {
+			response.append("Message sent to ").append(targetHostname);
+		} else {
+			response.append("Failed to send message to ").append(targetHostname);
+		}
+	}
+
+	private void handleBroadcastMessage(String message) {
+		String msg = message.substring(3);  // Remove "BC " prefix
+		Server.broadcastMessage(msg);
+	}
 
 	/**
 	 * Maneja un mensaje que contiene un número entero positivo.
