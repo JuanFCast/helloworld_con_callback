@@ -1,4 +1,7 @@
 import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
+
 
 public class Client {
     public static void main(String[] args) {
@@ -35,19 +38,19 @@ public class Client {
             switch (option){
                 case 1:
                     send(twoway, scanner);
-		    break;
+                    break;
                 case 2:
                     System.out.println(evaluateThroughput(twoway, scanner));
-		    break;
+                    break;
                 case 3:
-                    System.out.println(evaluateResponseTime(twoway));
-		    break;
+                    System.out.println(evaluateResponseTime(twoway,100));
+                    break;
                 case 4:
                     System.out.println(evaluateMissingRate(twoway, scanner));
-		    break;
+                    break;
                 case 5:
                     System.out.println(evaluateUnprocessedRate(twoway, scanner));
-		    break;
+                    break;
             }
         }while(option >= 1 && option <=5);
     }
@@ -70,7 +73,7 @@ public class Client {
 
             String formattedMessage = username + ":" + hostname + ":" + message;
             String response = twoway.printString(formattedMessage);
-            System.out.println("Server Response: " + response); 
+            System.out.println("Server Response: " + response);
         }
     }
 
@@ -92,36 +95,46 @@ public class Client {
         scanner.nextLine();
 
         long startTime = System.currentTimeMillis();
+        int successfulRequests = 0;
 
         for (int i = 0; i < numberOfRequests; i++) {
             try {
                 send(twoway, "!ls");
+                successfulRequests++;
             } catch (Exception e) {
-                e.printStackTrace();
+                // Log o manejo de error
             }
         }
 
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
 
-        double throughput = (double) numberOfRequests / (elapsedTime / 1000.0);
+        double throughput = (double) successfulRequests / (elapsedTime / 1000.0);
 
         return "Elapsed time in ms: " + elapsedTime + "\n" +
                 "Throughput (request per second): " + throughput;
     }
 
-    private static String evaluateResponseTime(Demo.PrinterPrx twoway){
-        long startTime = System.currentTimeMillis();
-        try {
-            send(twoway, "!ls");
-        } catch (Exception e) {
-            e.printStackTrace();
+    private static String evaluateResponseTime(Demo.PrinterPrx twoway, int numberOfSamples){
+        long totalResponseTime = 0;
+        List<Long> responseTimes = new ArrayList<>(); // Para almacenar tiempos de respuesta individuales
+
+        for (int i = 0; i < numberOfSamples; i++) {
+            long startTime = System.nanoTime(); // Cambio a nanoTime para mayor precisión
+            try {
+                send(twoway, "!ls");
+                long endTime = System.nanoTime();
+                long responseTime = endTime - startTime;
+                responseTimes.add(responseTime); // Agregar tiempo de respuesta a la lista
+                System.out.println("Response time for iteration " + (i+1) + ": " + responseTime + " ns"); // Imprimir tiempo de respuesta de cada iteración
+                totalResponseTime += responseTime;
+            } catch (Exception e) {
+                System.out.println("Error during iteration " + (i+1) + ": " + e.getMessage());
+            }
         }
-        long endTime = System.currentTimeMillis();
 
-        long responseTime = endTime - startTime;
-
-        return "Response time in ms: " + responseTime;
+        double averageResponseTime = (double) totalResponseTime / numberOfSamples;
+        return "Average response time: " + averageResponseTime + " ns";
     }
 
     private static String evaluateMissingRate(Demo.PrinterPrx twoway, Scanner scanner){
